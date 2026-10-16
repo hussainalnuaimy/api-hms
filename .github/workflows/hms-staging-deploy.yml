@@ -1,0 +1,28 @@
+name: HMS Staging Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hms-staging-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Deploy tested HMS image
+        env:
+          SSH_KEY: ${{ secrets.HMS_DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.HMS_DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key -p 2206 -o BatchMode=yes -o StrictHostKeyChecking=yes student@178.18.249.160 'bash /home/student/hms-manual-deploy.sh'
