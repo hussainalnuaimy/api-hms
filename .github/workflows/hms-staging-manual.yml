@@ -1,0 +1,22 @@
+name: HMS Staging Manual Check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  staging-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check HMS Staging
+        env:
+          SSH_KEY: ${{ secrets.HMS_DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.HMS_DEPLOY_KNOWN_HOSTS }}
+        run: |
+          umask 077
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key -p 2206 -o BatchMode=yes -o StrictHostKeyChecking=yes student@178.18.249.160 'systemctl --user is-active hms-api-staging.service && curl -fsS http://127.0.0.1:8003/openapi.json >/dev/null && echo STAGING_OK'
