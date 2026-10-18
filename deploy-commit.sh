@@ -4,8 +4,8 @@ set -euo pipefail
 SHA="${1:?Commit required}"
 REPO="$HOME/hms-auto-cd-source"
 
-git -C "$REPO" fetch origin auto-cd-prep
-git -C "$REPO" merge-base --is-ancestor "$SHA" origin/auto-cd-prep
+git -C "$REPO" fetch origin "${2:-auto-cd-prep}"
+git -C "$REPO" merge-base --is-ancestor "$SHA" FETCH_HEAD
 
 DIR=$(mktemp -d)
 trap 'rm -rf "$DIR"' EXIT
