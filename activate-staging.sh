@@ -14,14 +14,14 @@ podman tag "$OLD" localhost/hms-api:rollback-manual
 rollback() {
   trap - ERR
   podman tag localhost/hms-api:rollback-manual localhost/hms-api:dev
-  systemctl --user restart hms-api-staging.service || true
+  sudo -n systemctl --user --machine=student@.host restart hms-api-staging.service || true
   echo "DEPLOY_FAILED_ROLLBACK_ATTEMPTED" >&2
   exit 1
 }
 trap rollback ERR
 
 podman tag "$TARGET" localhost/hms-api:dev
-systemctl --user restart hms-api-staging.service
+sudo -n systemctl --user --machine=student@.host restart hms-api-staging.service
 
 TARGET_ID=$(podman image inspect "$TARGET" --format '{{.Id}}')
 
